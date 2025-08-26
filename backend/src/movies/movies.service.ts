@@ -1,3 +1,4 @@
+// src/movies/movies.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -23,16 +24,17 @@ export class MoviesService {
     return response.data;
   }
 
-  add(imdbId: string): Promise<Movie> {
-    const newMovie = this.moviesRepository.create({ imdbId });
+  // pra biblioteca propria por user
+  add(userId: string, imdbId: string): Promise<Movie> {
+    const newMovie = this.moviesRepository.create({ imdbId, user: { id: userId } });
     return this.moviesRepository.save(newMovie);
   }
 
-  async remove(imdbId: string): Promise<void> {
-    await this.moviesRepository.delete({ imdbId });
+  async remove(userId: string, imdbId: string): Promise<void> {
+    await this.moviesRepository.delete({ imdbId, user: { id: userId } });
   }
 
-  list(): Promise<Movie[]> {
-    return this.moviesRepository.find();
+  list(userId: string): Promise<Movie[]> {
+    return this.moviesRepository.find({ where: { user: { id: userId } } });
   }
 }
