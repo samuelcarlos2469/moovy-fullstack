@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Movie } from './movies/movie.entity';
+import { MoviesModule } from './movies/movies.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,6 +25,7 @@ import { Movie } from './movies/movie.entity';
         synchronize: true, // pra iniciar sóm, em dev
       })
     }),
+    MoviesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
