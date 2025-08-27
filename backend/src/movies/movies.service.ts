@@ -24,6 +24,15 @@ export class MoviesService {
     return response.data;
   }
 
+  async findOne(imdbId: string) {
+    const apiKey = this.configService.get<string>('OMDB_API_KEY');
+    //OMDb 'i' pra buscar por ID
+    const response = await firstValueFrom(
+        this.httpService.get(`http://www.omdbapi.com/?apikey=${apiKey}&i=${imdbId}`)
+    );
+    return response.data;
+  }
+
   // pra biblioteca propria por user
   add(userId: string, imdbId: string): Promise<Movie> {
     const newMovie = this.moviesRepository.create({ imdbId, user: { id: userId } });
@@ -34,7 +43,12 @@ export class MoviesService {
     await this.moviesRepository.delete({ imdbId, user: { id: userId } });
   }
 
-  list(userId: string): Promise<Movie[]> {
-    return this.moviesRepository.find({ where: { user: { id: userId } } });
+  list(userId: string, page: number, limit: number): Promise<Movie[]> {
+    const skip = (page - 1) * limit;
+    return this.moviesRepository.find({ 
+      where: { user: { id: userId } },
+      skip: skip,
+      take: limit,
+    });
   }
 }

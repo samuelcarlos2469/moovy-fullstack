@@ -11,6 +11,10 @@ export class MoviesController {
   search(@Query('term') term: string) {
     return this.moviesService.search(term);
   }
+  @Get('details/:imdbId')
+  findOne(@Param('imdbId') imdbId: string) {
+    return this.moviesService.findOne(imdbId);
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(':imdbId')
@@ -26,7 +30,11 @@ export class MoviesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  list(@Request() req: any) {
-    return this.moviesService.list(req.user.userId);
+  list(
+    @Request() req: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.moviesService.list(req.user.userId, page, limit);
   }
 }
