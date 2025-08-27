@@ -29,10 +29,8 @@ const MovieSearch: React.FC = () => {
   const [movies, setMovies] = useState<MovieResult[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Estado para armazenar os resultados brutos da busca
   const [searchResults, setSearchResults] = useState<MovieResult[]>([]);
 
-  // Efeito para buscar detalhes dos filmes quando os resultados da busca mudam
   useEffect(() => {
     if (searchResults.length === 0) {
       setMovies([]);
@@ -43,11 +41,10 @@ const MovieSearch: React.FC = () => {
       try {
         const detailedMovies = await Promise.all(
           searchResults.map(async (movie) => {
-            // Esta é a chamada para sua nova rota de backend
-            const response = await fetch(`http://localhost:3000/movies/${movie.imdbID}`);
+            const response = await fetch(`http://localhost:3000/movies/details/${movie.imdbID}`);
             if (!response.ok) {
               console.error(`Falha ao buscar detalhes para ${movie.imdbID}`);
-              return { ...movie, imdbRating: 'N/A' }; // Retorna N/A se a busca falhar
+              return { ...movie, imdbRating: 'N/A' };
             }
             const details = await response.json();
             return { ...movie, imdbRating: details.imdbRating || 'N/A' };
@@ -56,14 +53,12 @@ const MovieSearch: React.FC = () => {
         setMovies(detailedMovies);
       } catch (e) {
         console.error("Erro ao buscar detalhes dos filmes", e);
-        // Se houver um erro geral, apenas exibe os filmes sem nota
         setMovies(searchResults);
       }
     };
 
     fetchMovieDetails();
   }, [searchResults]);
-
 
   const handleSearch = async (term: string) => {
     if (term.length > 2) {
@@ -116,10 +111,17 @@ const MovieSearch: React.FC = () => {
       </Box>
 
       {error && <Typography color="error">{error}</Typography>}
-
       <Grid container spacing={3}>
         {movies.map((movie) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={movie.imdbID}>
+          <Grid
+            key={movie.imdbID}
+            size={{
+              xs: 12,
+              sm: 6,
+              md: 4,
+              lg: 3
+            }}
+          >
             <Card
               sx={{
                 height: '100%',
@@ -129,6 +131,15 @@ const MovieSearch: React.FC = () => {
                 '&:hover': {
                   transform: 'scale(1.03)',
                   boxShadow: 6,
+                },
+                // hover no Card pai, revisar se não é gambiarra depois
+                '&:hover .hover-content': {
+                  opacity: 1,
+                  maxHeight: '100px', // ou 'auto'
+                  
+                },
+                '&:hover .hover-actions': {
+                  opacity: 1,
                 },
               }}
             >
@@ -140,7 +151,8 @@ const MovieSearch: React.FC = () => {
               />
               <CardContent sx={{ flexGrow: 1, overflow: 'hidden' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography gutterBottom variant="h6" component="div" noWrap>
+                  {/* overflow pro noWrap funcionar, revisar se é gambiarra depois */}
+                  <Typography gutterBottom variant="h6" component="div" noWrap sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {movie.Title}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, ml: 1 }}>
@@ -151,10 +163,11 @@ const MovieSearch: React.FC = () => {
                   </Box>
                 </Box>
                 
-                {/* Informações que aparecem no hover */}
-                <Box sx={{ 
+                {/* n esta funcionando */}
+                <Box className="hover-content" sx={{ 
                   opacity: 0, 
                   maxHeight: 0, 
+                  overflow: 'hidden', 
                   transition: 'opacity 0.5s ease, max-height 0.5s ease', 
                   'Card:hover &': { opacity: 1, maxHeight: '100px' } 
                 }}>
@@ -164,8 +177,8 @@ const MovieSearch: React.FC = () => {
                 </Box>
               </CardContent>
 
-              {/* Botão que aparece no hover */}
-              <CardActions sx={{ 
+              {/* corrigir */}
+              <CardActions className='hover-actions' sx={{ 
                 p: 2, pt: 0, 
                 opacity: 0, 
                 transition: 'opacity 0.5s ease', 
